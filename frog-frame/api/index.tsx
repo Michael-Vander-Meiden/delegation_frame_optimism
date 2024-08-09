@@ -36,6 +36,11 @@ app.frame('/', (c) => {
           width: '100%',
         }}
       >
+        <img
+          src="https://superhack-frame.s3.us-west-1.amazonaws.com/frame_images/back2.png"
+          alt="Background"
+          height="200px"
+        />
         <div
           style={{
             color: 'white',
