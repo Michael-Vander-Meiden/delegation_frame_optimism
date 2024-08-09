@@ -1,8 +1,17 @@
+import * as dotenv from 'dotenv'
+dotenv.config();
+
 import { Button, Frog, TextInput } from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
 // import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
+
+const apiUrl = process.env.AGORA_API_URL;
+const apiKey = process.env.AGORA_API_KEY;
+
+console.log('API URL:', apiUrl);
+console.log('API Key:', apiKey);
 
 // Uncomment to use Edge Runtime.
 // export const config = {
@@ -16,6 +25,7 @@ export const app = new Frog({
   // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
   title: 'Frog Frame',
 })
+
 
 app.frame('/', (c) => {
   const { buttonValue, inputText, status } = c
