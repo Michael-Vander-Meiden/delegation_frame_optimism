@@ -1,0 +1,37 @@
+name: Auto Tag
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get the current tag
+        id: current-tag
+        run: |
+          git fetch --tags
+          TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "::set-output name=tag::$TAG"
+
+      - name: Bump version and create tag
+        id: tag-version
+        run: |
+          echo "Current tag: ${{ steps.current-tag.outputs.tag }}"
+          # Extract the version number and increment it
+          VERSION=$(echo ${{ steps.current-tag.outputs.tag }} | awk -F. -v OFS=. '{$NF += 1 ; print}')
+          echo "New tag: $VERSION"
+          echo "::set-output name=version::$VERSION"
+
+      - name: Create new tag
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git tag ${{ steps.tag-version.outputs.version }}
+          git push origin ${{ steps.tag-version.outputs.version }}
