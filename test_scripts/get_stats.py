@@ -33,7 +33,45 @@ def _extract_eth_addresses(response_data):
         addresses = user.get('verified_addresses', {}).get('eth_addresses', [])
         eth_addresses.extend(addresses)
     return eth_addresses
+
 #check delegate from ethereum address
+def get_delegate_from_ethereum_address(eth_address):
+    api_url = "https://vote.optimism.io/api/v1//delegates/{}/delegatees".format(eth_address)
+    agora_api_key = os.getenv("AGORA_API_KEY")
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {agora_api_key}"
+    }
+    params = {
+        "addressOrEnsName": eth_address
+    }
+    response = requests.get(api_url, headers=headers, params=params)
+    
+    #should return empty list if no delegate
+    if len(response.json()) == 0:
+        return False
+    
+    #return delegate address if delegate exists
+    delegate_address= response.json()[0]["to"]
+    if response.status_code == 200:
+        return delegate_address
+    else:
+        return {"error": response.status_code, "message": response.text}
+
+def check_if_delegate_is_good(delegate_address):
+    api_url = "https://vote.optimism.io/api/v1/delegates/{}".format(delegate_address)
+    agora_api_key = os.getenv("AGORA_API_KEY")
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {agora_api_key}"
+    }
+    response = requests.get(api_url, headers=headers)
+    
+    #check if delegate is good
+    if response.json()["isGoodDelegate"]:
+        return True
+    else:
+        return False
 
 # check if delegate voted in most recent vote
 def get_stats_function(fid):
@@ -50,7 +88,9 @@ def get_stats_function(fid):
     return_package["hasVerifiedAddress"] = True
     eth_address = eth_addresses[0]
 
-    #TODO check if there is a delegate
+    #check if there is a delegate
+    delegate_address = get_delegate_from_ethereum_address("0xa30149a4FE6349c41E7d7271e0fC4104aB74c8FF")
+    return_package["hasDelegate"] = delegate_address
 
     #TODO check if it is a good delegate
 
