@@ -1,7 +1,11 @@
+
+import * as dotenv from 'dotenv'
+dotenv.config();
+
 import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
-// import { neynar } from 'frog/hubs'
+import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
 
 import { delegatesStatsFrame } from './delegates/delegatesStatsFrame.js'
@@ -15,11 +19,20 @@ export const app = new Frog({
   assetsPath: '/',
   basePath: '/api',
   // Supply a Hub to enable frame verification.
-  // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
+  hub: neynar({ apiKey: 'NEYNAR_FROG_FM' }),
   title: 'Delegates Frame',
 })
 
+
 app.frame('/', (c) => {
+  const { frameData, verified } = c;
+  
+  if (!verified) console.log('Frame verification failed')
+    console.log('frameData', frameData)
+  
+  const { fid } = frameData || {}
+  
+  console.log('fid', fid)
   return c.res({
     image: (
       <div
@@ -52,7 +65,7 @@ app.frame('/', (c) => {
             whiteSpace: 'pre-wrap',
           }}
         >
-          View your delegates
+          View your delegates {`API Response: ${fid}`}
         </div>
       </div>
     ),
