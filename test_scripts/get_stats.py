@@ -65,19 +65,32 @@ def check_if_delegate_is_good(delegate_address):
         "accept": "application/json",
         "Authorization": f"Bearer {agora_api_key}"
     }
-    response = requests.get(api_url, headers=headers)
+    params = {
+        "addressOrEns": delegate_address
+    }
+
+
+    response = requests.get(api_url, headers=headers, params=params)
     
-    #check if delegate is good
-    if response.json()["isGoodDelegate"]:
-        return True
+    response_data = response.json()    
+    statement = response_data.get("statement", None)
+    if statement is None:
+        return (False, None)
     else:
-        return False
+        warpcast_name = statement.get("warpcast", None)
+
+
+    #check if delegate is good
+    if response.json()["lastTenProps"]=="10":
+        return (True, warpcast_name)
+    else:
+        return (False, warpcast_name)
 
 # check if delegate voted in most recent vote
 def get_stats_function(fid):
 
     #Create dictionary that we will return
-    return_package = {"hasVerifiedAddress": False, "hasDelegate": False, "isGoodDelegate": False, "delegateInfo": {}}
+    return_package = {"hasVerifiedAddress": False, "hasDelegate": False, "isGoodDelegate": False, "delegateInfo": None}
 
     #check if there is a verified ethereum address
     eth_addresses = get_ethereum_addresses_from_fids([fid])
@@ -89,12 +102,17 @@ def get_stats_function(fid):
     eth_address = eth_addresses[0]
 
     #check if there is a delegate
-    delegate_address = get_delegate_from_ethereum_address("0xa30149a4FE6349c41E7d7271e0fC4104aB74c8FF")
+    delegate_address = get_delegate_from_ethereum_address(eth_address)
     return_package["hasDelegate"] = delegate_address
+    if not delegate_address:
+        return return_package
 
-    #TODO check if it is a good delegate
+    #check if it is a good delegate AND check warpcast name
+    
+    is_good_delegate, delegate_warpcast = check_if_delegate_is_good(delegate_address)
 
-    #TODO return delegate info (delgate name or ENS)
+    return_package["isGoodDelegate"] = is_good_delegate
+    return_package["delegateInfo"] = {"delegateAddress": delegate_address, "warpcast": delegate_warpcast}
 
     return return_package
 
