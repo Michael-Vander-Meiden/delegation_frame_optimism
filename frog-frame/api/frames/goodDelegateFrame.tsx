@@ -17,21 +17,23 @@ export function goodDelegateFrame(fid: number, c : FrameContext) {
             <div
               style={{
                 position: 'absolute',
-                color: '#ffffff',
-                lineHeight: 1,
-                fontSize: 100,
-                fontFamily: '"Oswald Bold"',
+                color: '#E5383B',
+                fontSize: '55px',
                 textAlign: 'center',
+                lineHeight: '0.7',
                 textTransform: 'uppercase',
-                textShadow:
-                  '5px 5px 3px #000, -5px 5px 3px #000, -5px -5px 0 #000, 5px -5px 0 #000',
-                width: '100%',
+                letterSpacing: '-0.030em',
+                whiteSpace: 'wrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                width: '250',
                 height: '100%',
-                padding: '50px 200px',
+                left: '190px',
+                bottom: '210px',
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              {`User ${fid} has good Delegates`}
+              {`User ${fid}`}
             </div>
           </div>
         ),
