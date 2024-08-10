@@ -1,0 +1,26 @@
+WITH transfers AS (
+    SELECT "from" AS address, SUM(CAST(value AS INT256) * -1) / 1e18 AS amount 
+    FROM op_optimism.GovernanceToken_evt_Transfer 
+    WHERE contract_address = 0x4200000000000000000000000000000000000042 
+    GROUP BY 1 
+    UNION ALL 
+    SELECT "to" AS address, SUM(CAST(value AS INT256)) / 1e18 AS amount 
+    FROM op_optimism.GovernanceToken_evt_Transfer 
+    WHERE contract_address = 0x4200000000000000000000000000000000000042 
+    GROUP BY 1
+), 
+balance AS (
+    SELECT address, SUM(amount) AS current_balance 
+    FROM transfers 
+    GROUP BY 1
+),
+latest_delegation AS (
+    SELECT delegator, toDelegate, ROW_NUMBER() OVER (PARTITION BY delegator ORDER BY evt_block_time DESC) AS rn
+    FROM op_optimism.GovernanceToken_evt_DelegateChanged
+)
+SELECT b.address, b.current_balance, ld.toDelegate AS most_recent_delegate
+FROM balance b
+INNER JOIN latest_delegation ld ON b.address = ld.delegator AND ld.rn = 1
+WHERE b.address <> 0x4200000000000000000000000000000000000042 
+ORDER BY b.current_balance DESC 
+LIMIT 200000

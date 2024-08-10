@@ -1,9 +1,6 @@
-
 import os
 import requests
 import json
-from web3 import Web3
-
 
 fid = "192336"
 
