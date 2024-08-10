@@ -12,6 +12,10 @@ export async function goodDelegateFrame (fid: number, c : FrameContext) {
     return errorFrame(c)
   }
   const userDelegate = delegate.delegateInfo.warpcast
+
+  if (typeof userDelegate !== 'string' || userDelegate === null) {
+    throw new Error('Invalid type returned');
+  }
   const addressDelegate = delegate.delegateInfo.delegateAddress
 
   const delegateData = userDelegate? userDelegate : addressDelegate

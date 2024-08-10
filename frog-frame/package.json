@@ -10,11 +10,14 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "frog": "latest",
-    "hono": "^4"
+    "hono": "^4",
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
-    "vercel": "^32.4.1"
+    "vercel": "^35.2.4"
   }
 }

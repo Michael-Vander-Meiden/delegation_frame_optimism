@@ -29,8 +29,8 @@ delegatesStatsFrame.frame('/', async (c) => {
   } 
   
 /*   delegate.hasVerifiedAddress = true
-  delegate.hasDelegate = true
-  delegate.isGoodDelegate = true */
+  delegate.hasDelegate = false
+  delegate.isGoodDelegate = false */
 
   if(!delegate.hasVerifiedAddress) {
     return noVerifiedAddressFrame(c)
@@ -43,6 +43,10 @@ delegatesStatsFrame.frame('/', async (c) => {
   if(!delegate.isGoodDelegate) {
     return badDelegateFrame(fid, c)
   }
+
+/*   if(!delegate.isGoodDelegate || !delegate.hasDelegate){
+    return exploreDelegatesFrame(fid, c)
+  } */
 
   return goodDelegateFrame(fid, c)    
 })
