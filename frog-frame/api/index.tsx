@@ -4,7 +4,7 @@ import { serveStatic } from 'frog/serve-static'
 // import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
 
-import { delegatesStatsFrame } from './delegates/stats/delegatesStatsFrame.js'
+import { delegatesStatsFrame } from './delegates/delegatesStatsFrame.js'
 
 // Uncomment to use Edge Runtime.
 // export const config = {
@@ -25,7 +25,7 @@ app.frame('/', (c) => {
       <div
         style={{
           alignItems: 'center',
-          background: 'black',
+          background: '#bcded0',
           backgroundSize: '100% 100%',
           display: 'flex',
           flexDirection: 'column',
@@ -43,7 +43,6 @@ app.frame('/', (c) => {
         />
         <div
           style={{
-            color: 'white',
             fontSize: 60,
             fontStyle: 'normal',
             letterSpacing: '-0.025em',
