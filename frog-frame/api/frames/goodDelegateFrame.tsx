@@ -1,6 +1,21 @@
 import { Button, FrameContext } from "frog";
+import {getStats } from '../service/statsService.js';
+import { DelegatesResponseDTO } from '../service/delegatesResponseDTO.js';
+import { errorFrame } from '../frames/errorFrame.js';
 
-export function goodDelegateFrame(fid: number, c : FrameContext) {
+export async function goodDelegateFrame (fid: number, c : FrameContext) {
+  let delegate : DelegatesResponseDTO
+
+  try {
+    delegate = await getStats(fid)
+  } catch (e) {
+    return errorFrame(c)
+  }
+  const userDelegate = delegate.delegateInfo.warpcast
+  const addressDelegate = delegate.delegateInfo.delegateAddress
+
+  const delegateData = userDelegate? userDelegate : addressDelegate
+
     return c.res({
         image: (          
           <div style={{
@@ -18,22 +33,23 @@ export function goodDelegateFrame(fid: number, c : FrameContext) {
               style={{
                 position: 'absolute',
                 color: '#E5383B',
-                fontSize: '55px',
-                textAlign: 'center',
+                fontSize: '75px',
                 lineHeight: '0.7',
                 textTransform: 'uppercase',
                 letterSpacing: '-0.030em',
                 whiteSpace: 'wrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                width: '250',
+                with: '100%',
+                maxWidth: '240px',
                 height: '100%',
-                left: '190px',
-                bottom: '210px',
-                justifyContent: 'center',
-                alignItems: 'center',
+                maxHeight: '340px',
+                left: '195px',
+                bottom: '230px',
+                justifyContent: 'flex-start',
+                alignItems: 'flex-start',
               }}>
-              {`User ${fid}`}
+              {`${delegateData}`}
             </div>
           </div>
         ),

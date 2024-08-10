@@ -18,6 +18,7 @@ export function noDelegateFrame(fid: number, c : FrameContext) {
         ),
         intents: [
           <Button action='/exploreDelegates'>Explore delegates</Button>,
+          <Button.Reset>Reset</Button.Reset>,
         ],
       })
   }
