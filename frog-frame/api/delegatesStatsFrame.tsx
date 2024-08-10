@@ -12,7 +12,7 @@ export const delegatesStatsFrame = new Frog({ title: 'Delegate Stats Frame' })
  
 delegatesStatsFrame.frame('/', async (c) => {
   /* const { frameData, verified } = c;
-  const { fid } = frameData || {} */    
+  const { fid } = frameData || {}    */ 
   const { inputText } = c;
   const fid = inputText === undefined ? c.frameData?.fid : Number(inputText)
 
@@ -28,7 +28,7 @@ delegatesStatsFrame.frame('/', async (c) => {
     return errorFrame(c)
   } 
   
-  /* delegate.hasVerifiedAddress = true
+/*   delegate.hasVerifiedAddress = true
   delegate.hasDelegate = true
   delegate.isGoodDelegate = true */
 

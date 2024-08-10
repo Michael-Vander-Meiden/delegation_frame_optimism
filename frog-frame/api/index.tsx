@@ -20,7 +20,16 @@ export const app = new Frog({
   basePath: '/api',
   hub: neynar({ apiKey: 'NEYNAR_FROG_FM' }),
   title: 'Delegates Frame',
-  verify: 'silent'
+  verify: 'silent',
+  imageOptions: {
+    fonts: [
+      {
+        name: 'Koulen',
+        weight: 400,
+        source: 'google',
+      }
+    ]
+  }
 })
 
 
