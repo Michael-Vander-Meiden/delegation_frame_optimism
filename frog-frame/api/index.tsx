@@ -1,10 +1,14 @@
+
+import * as dotenv from 'dotenv'
+dotenv.config();
+
 import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
-// import { neynar } from 'frog/hubs'
+import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
 
-import { delegatesStatsFrame } from './delegates/stats/delegatesStatsFrame.js'
+import { delegatesStatsFrame } from './delegates/delegatesStatsFrame.js'
 
 // Uncomment to use Edge Runtime.
 // export const config = {
@@ -15,17 +19,26 @@ export const app = new Frog({
   assetsPath: '/',
   basePath: '/api',
   // Supply a Hub to enable frame verification.
-  // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
+  hub: neynar({ apiKey: 'NEYNAR_FROG_FM' }),
   title: 'Delegates Frame',
 })
 
+
 app.frame('/', (c) => {
+  const { frameData, verified } = c;
+  
+  if (!verified) console.log('Frame verification failed')
+    console.log('frameData', frameData)
+  
+  const { fid } = frameData || {}
+  
+  console.log('fid', fid)
   return c.res({
     image: (
       <div
         style={{
           alignItems: 'center',
-          background: 'black',
+          background: '#bcded0',
           backgroundSize: '100% 100%',
           display: 'flex',
           flexDirection: 'column',
@@ -36,9 +49,13 @@ app.frame('/', (c) => {
           width: '100%',
         }}
       >
+        <img
+          src="https://superhack-frame.s3.us-west-1.amazonaws.com/frame_images/back2.png"
+          alt="Background"
+          height="200px"
+        />
         <div
           style={{
-            color: 'white',
             fontSize: 60,
             fontStyle: 'normal',
             letterSpacing: '-0.025em',
@@ -48,7 +65,7 @@ app.frame('/', (c) => {
             whiteSpace: 'pre-wrap',
           }}
         >
-          View your delegates
+          View your delegates {`API Response: ${fid}`}
         </div>
       </div>
     ),
