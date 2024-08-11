@@ -20,10 +20,10 @@ function getIntents(delegates: addressCount[]) : FrameIntent[]{
 
 exploreDelegatesFrame.frame('/', async (c) => {
 
-  const { frameData } = c;
-  const { fid } = frameData || {};  
+/*   const { frameData } = c;
+  const { fid } = frameData || {};   */
 
-  //const fid = 192336
+  const fid = 192336
   if (typeof fid !== 'number' || fid === null) {
     throw new Error('Invalid type returned');
   }
