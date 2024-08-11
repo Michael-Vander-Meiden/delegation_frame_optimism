@@ -1,6 +1,6 @@
-import { Button, Frog } from 'frog';
+import { Button, FrameIntent, Frog } from 'frog';
 import { getSuggestedDelegates } from '../service/suggestedDelegatesServices.js';
-import { suggestionResponseDTO } from '../service/suggestionResponseDTO.js';
+import { addressCount, suggestionResponseDTO } from '../service/suggestionResponseDTO.js';
 import { errorFrame } from '../frames/errorFrame.js';
 
 export const exploreDelegatesFrame = new Frog({ title: 'Explore Delegates' });
