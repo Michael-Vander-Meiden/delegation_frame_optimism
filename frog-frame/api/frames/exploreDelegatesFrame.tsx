@@ -1,14 +1,17 @@
-import { Button, Frog, FrameContext } from 'frog';
+import { Button, Frog } from 'frog';
 import { getSuggestedDelegates } from '../service/suggestedDelegatesServices.js';
 import { suggestionResponseDTO } from '../service/suggestionResponseDTO.js';
 import { errorFrame } from '../frames/errorFrame.js';
 
 export const exploreDelegatesFrame = new Frog({ title: 'Explore Delegates' });
 
-exploreDelegatesFrame.frame('/', async ( c: FrameContext) => {
+exploreDelegatesFrame.frame('/', async (c) => {
 
-  const { frameData } = c;
+/*   const { frameData } = c;
   const { fid } = frameData || {};  
+  console.log('fid on explore frame:', fid); */
+
+  const fid = 192336
 
   if (typeof fid !== 'number' || fid === null) {
     throw new Error('Invalid type returned');
@@ -21,8 +24,7 @@ exploreDelegatesFrame.frame('/', async ( c: FrameContext) => {
 
 
     if (delegates.length === 0) {
-      const failedMessage = 'No delegates found.';
-      return failedMessage;
+      return errorFrame(c)
     }
 
   } catch (e) {
@@ -54,6 +56,7 @@ exploreDelegatesFrame.frame('/', async ( c: FrameContext) => {
             width: '100%',
             height: '100%',
             justifyContent: 'center',
+            boxSizing: 'border-box',
             alignItems: 'center',
             lineHeight: 1.4,
             padding: '0 120px',
@@ -61,19 +64,40 @@ exploreDelegatesFrame.frame('/', async ( c: FrameContext) => {
             textOverflow: 'ellipsis',
             textAlign: 'center', 
           }}>
-          <h1>{`Suggested delegates`}</h1>
-          <h2>{`Address`}</h2>
-          <ul style={{ listStyleType: 'none', padding: 0, margin: '20px 0', fontSize: '30px' }}>
-            {delegates.map((item, index) => (
-              <li key={index} style={{ margin: '10px 0' }}>{item.address}</li>
-            ))}
-          </ul>
-          <h2>{`Following accounts delegating to this address `}</h2>
-          <ul style={{ listStyleType: 'none', padding: 0, margin: '20px 0', fontSize: '30px' }}>
-            {delegates.map((item, index) => (
-              <li key={index} style={{ margin: '10px 0' }}>{item.count}</li>
-            ))}
-          </ul>
+            <h1>{`Suggested delegates`}</h1>
+            <div style={{
+                display: 'flex',
+                width: '100%',
+                maxWidth: '100%',
+                overflowX: 'auto',
+                justifyContent: 'center'
+            }}>
+                  <ul style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: '1',
+                    listStyleType: 'none',
+                    padding: 0,
+                    margin: '0 10px',
+                  }}>
+                    {delegates.map((item, index) => (
+                      <li key={index} style={{ margin: '10px 0', padding: '5px', borderBottom: '1px solid #ddd' }}>{item.address}</li>
+                    ))}
+                  </ul>
+                
+                  <ul style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: '1',
+                    listStyleType: 'none',
+                    padding: 0,
+                    margin: '0 10px',
+                  }}>
+                    {delegates.map((item, index) => (
+                      <li key={index} style={{ margin: '10px 0', padding: '5px', borderBottom: '1px solid #ddd' }}>{item.count}</li>
+                    ))}
+                  </ul>
+            </div>
         </div>
       </div>
     ),

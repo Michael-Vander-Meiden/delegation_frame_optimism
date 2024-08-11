@@ -28,9 +28,9 @@ delegatesStatsFrame.frame('/', async (c) => {
     return errorFrame(c)
   } 
   
-  delegate.hasVerifiedAddress = true
+/*   delegate.hasVerifiedAddress = true
   delegate.hasDelegate = false
-  delegate.isGoodDelegate = false
+  delegate.isGoodDelegate = false */
 
   if(!delegate.hasVerifiedAddress) {
     return noVerifiedAddressFrame(c)
