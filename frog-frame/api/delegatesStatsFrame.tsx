@@ -37,7 +37,7 @@ delegatesStatsFrame.frame('/', async (c) => {
   }   
 
   if(!delegate.hasDelegate) {
-    return noDelegateFrame(fid, c)
+    return noDelegateFrame(c)
   }
 
   if(!delegate.isGoodDelegate) {

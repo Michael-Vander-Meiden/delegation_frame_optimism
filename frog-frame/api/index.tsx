@@ -36,7 +36,7 @@ export const app = new Frog({
 app.frame('/', (c) => {
   
   return c.res({
-    image: 'https://superhack-frame.s3.us-west-1.amazonaws.com/frame_images/Frame_1_start.png',
+    image: `${process.env.IMAGE_URL}/Frame_1_start.png`,
     imageAspectRatio: '1.91:1',
     intents: [
       <TextInput placeholder="Enter fid..." />,

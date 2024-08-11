@@ -41,7 +41,7 @@ exploreDelegatesFrame.frame('/', async (c) => {
         alignItems: 'center',
         position: 'relative'
       }}>
-        <img width="1200" height="630" alt="background" src="https://superhack-frame.s3.us-west-1.amazonaws.com/frame_images/back2.png" />
+        <img width="1200" height="630" alt="background" src={`${process.env.IMAGE_URL}/back2.png`}/>
         <div
           style={{
             display: 'flex',

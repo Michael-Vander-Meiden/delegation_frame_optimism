@@ -29,7 +29,7 @@ export async function badDelegateFrame(fid: number, c : FrameContext) {
             alignItems: 'center',
             position: 'relative'
             }}>
-            <img width="1200" height="630" alt="background" src="https://superhack-frame.s3.us-west-1.amazonaws.com/frame_images/Frame_2.1_bad_delegate_stats.png" />
+            <img width="1200" height="630" alt="background" src={`${process.env.IMAGE_URL}/Frame_2.1_bad_delegate_stats.png`}/>
             <div
               style={{
                 position: 'absolute',
