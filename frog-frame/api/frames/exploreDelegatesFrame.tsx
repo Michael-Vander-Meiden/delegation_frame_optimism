@@ -5,9 +5,16 @@ import { errorFrame } from '../frames/errorFrame.js';
 
 export const exploreDelegatesFrame = new Frog({ title: 'Explore Delegates' });
 
+function getOrdinalSuffix(index: number): string {
+  const suffixes = ["th", "st", "nd", "rd"];
+  const value = index % 100;
+  return suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0];
+}
+
 function getIntents(delegates: addressCount[]) : FrameIntent[]{
   return delegates.map((delegate: addressCount, index: number) => {
-    return <Button.Link href={`https://vote.optimism.io/delegates/${delegate.address}`}>{`${index+1} Delegate`}</Button.Link>
+    const position = index+1
+    return <Button.Link href={`https://vote.optimism.io/delegates/${delegate.address}`}>{`${position}${getOrdinalSuffix(position)} Delegate`}</Button.Link>
   })
 }
 
