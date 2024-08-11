@@ -5,6 +5,12 @@ import { errorFrame } from '../frames/errorFrame.js';
 
 export const exploreDelegatesFrame = new Frog({ title: 'Explore Delegates' });
 
+function getIntents(delegates: addressCount[]) : FrameIntent[]{
+  return delegates.map((delegate: addressCount, index: number) => {
+    return <Button.Link href={`https://vote.optimism.io/delegates/${delegate.address}`}>{`${index+1} Delegate`}</Button.Link>
+  })
+}
+
 exploreDelegatesFrame.frame('/', async (c) => {
 
   const { frameData } = c;
@@ -16,6 +22,7 @@ exploreDelegatesFrame.frame('/', async (c) => {
   }
 
   let delegates: suggestionResponseDTO
+  let intents: FrameIntent[]
 
   try {
     delegates = await getSuggestedDelegates(fid);
@@ -23,6 +30,9 @@ exploreDelegatesFrame.frame('/', async (c) => {
     if (delegates.length === 0) {
       return errorFrame(c)
     }
+
+    intents = getIntents(delegates)
+    intents.push(<Button.Reset>Reset</Button.Reset>)
 
   } catch (e) {
     return errorFrame(c);
@@ -112,11 +122,6 @@ exploreDelegatesFrame.frame('/', async (c) => {
         </div>
       </div>
     ),
-    intents: [
-      <Button.Link href={`https://vote.optimism.io/delegates/${delegates[0].address}`}>1st Delegate</Button.Link>,
-      <Button.Link href={`https://vote.optimism.io/delegates/${delegates[1].address}`}>2st Delegate</Button.Link>,
-      <Button.Link href={`https://vote.optimism.io/delegates/${delegates[2].address}`}>3st Delegate</Button.Link>,
-      <Button.Reset>Reset</Button.Reset>,
-    ],
+    intents: intents
   });
 });
