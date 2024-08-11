@@ -36,7 +36,7 @@ export const app = new Frog({
 app.frame('/', (c) => {
   
   return c.res({
-    image: `${process.env.IMAGE_URL}/Frame_1_start.png`,
+    image: `/Frame_1_start.png`,
     imageAspectRatio: '1.91:1',
     intents: [
       <TextInput placeholder="Enter fid..." />,

@@ -6,6 +6,8 @@ export async function getSuggestedDelegates(fid: number): Promise<suggestionResp
 
     delegateApiURL.searchParams.append('fid', fid.toString());
 
+    //const fid = 192336
+
     const response = await fetch(delegateApiURL, {
         method: 'GET',
         headers: {

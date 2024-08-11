@@ -10,7 +10,7 @@ exploreDelegatesFrame.frame('/', async (c) => {
   const { frameData } = c;
   const { fid } = frameData || {};  
 
-
+  //const fid = 192336
   if (typeof fid !== 'number' || fid === null) {
     throw new Error('Invalid type returned');
   }
@@ -19,7 +19,6 @@ exploreDelegatesFrame.frame('/', async (c) => {
 
   try {
     delegates = await getSuggestedDelegates(fid);
-
 
     if (delegates.length === 0) {
       return errorFrame(c)
@@ -41,14 +40,14 @@ exploreDelegatesFrame.frame('/', async (c) => {
         alignItems: 'center',
         position: 'relative'
       }}>
-        <img width="1200" height="630" alt="background" src={`${process.env.IMAGE_URL}/back2.png`}/>
+        <img width="1200" height="630" alt="background" src={`${process.env.IMAGE_URL}/Frame_3_rec.png`}/>
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             position: 'absolute',
-            color: '#E5383B',
-            fontSize: '30px',
+            color: '#161B33',
+            fontSize: '70px',
             textTransform: 'uppercase',
             letterSpacing: '-0.030em',
             width: '100%',
@@ -57,44 +56,56 @@ exploreDelegatesFrame.frame('/', async (c) => {
             boxSizing: 'border-box',
             alignItems: 'center',
             lineHeight: 1.4,
-            padding: '0 120px',
+            padding: '0px 50px',
             overflow: 'hidden', 
             textOverflow: 'ellipsis',
             textAlign: 'center', 
           }}>
-            <h1>{`Suggested delegates`}</h1>
+            <h1></h1>
             <div style={{
                 display: 'flex',
+                flexDirection: 'row',
                 width: '100%',
                 maxWidth: '100%',
-                overflowX: 'auto',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: '10px'
             }}>
                   <ul style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    flex: '1',
                     listStyleType: 'none',
-                    padding: 0,
-                    margin: '0 10px',
-                    width: '20%',
+                    padding: '0',
+                    margin: '0',
+                    width: '40%',
+                    boxSizing: 'border-box'
                   }}>
                     {delegates.map((item, index) => (
-                      <li key={index} style={{ margin: '10px 0', padding: '5px', borderBottom: '1px solid #ddd' }}>{item.address}</li>
+                      <li key={index} style={{
+                        margin: '10px 0',
+                        padding: '5px',
+                        borderBottom: '1px solid #ddd',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}>{item.address}</li>
                     ))}
                   </ul>
                 
                   <ul style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    flex: '1',
                     listStyleType: 'none',
                     padding: 0,
-                    margin: '0 10px',
+                    margin: '0',
                     width: '20%',
+                    boxSizing: 'border-box',
                   }}>
                     {delegates.map((item, index) => (
-                      <li key={index} style={{ margin: '10px 0', padding: '5px', borderBottom: '1px solid #ddd' }}>{item.count}</li>
+                      <li key={index} style={{ margin: '10px 0',
+                        padding: '5px',
+                        borderBottom: '1px solid #ddd',
+                        justifyContent: 'flex-end', }}>{item.count}</li>
                     ))}
                   </ul>
             </div>
@@ -102,6 +113,9 @@ exploreDelegatesFrame.frame('/', async (c) => {
       </div>
     ),
     intents: [
+      <Button.Link href={`https://vote.optimism.io/delegates/${delegates[0].address}`}>1st Delegate</Button.Link>,
+      <Button.Link href={`https://vote.optimism.io/delegates/${delegates[1].address}`}>2st Delegate</Button.Link>,
+      <Button.Link href={`https://vote.optimism.io/delegates/${delegates[2].address}`}>3st Delegate</Button.Link>,
       <Button.Reset>Reset</Button.Reset>,
     ],
   });
