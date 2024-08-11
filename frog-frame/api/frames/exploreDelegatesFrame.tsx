@@ -9,7 +9,6 @@ exploreDelegatesFrame.frame('/', async (c) => {
 
   const { frameData } = c;
   const { fid } = frameData || {};  
-  console.log('fid on explore frame:', fid);
 
 
   if (typeof fid !== 'number' || fid === null) {
