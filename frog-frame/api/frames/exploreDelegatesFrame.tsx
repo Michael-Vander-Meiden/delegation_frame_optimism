@@ -7,11 +7,10 @@ export const exploreDelegatesFrame = new Frog({ title: 'Explore Delegates' });
 
 exploreDelegatesFrame.frame('/', async (c) => {
 
-/*   const { frameData } = c;
+  const { frameData } = c;
   const { fid } = frameData || {};  
-  console.log('fid on explore frame:', fid); */
+  console.log('fid on explore frame:', fid);
 
-  const fid = 192336
 
   if (typeof fid !== 'number' || fid === null) {
     throw new Error('Invalid type returned');
@@ -79,6 +78,7 @@ exploreDelegatesFrame.frame('/', async (c) => {
                     listStyleType: 'none',
                     padding: 0,
                     margin: '0 10px',
+                    width: '20%',
                   }}>
                     {delegates.map((item, index) => (
                       <li key={index} style={{ margin: '10px 0', padding: '5px', borderBottom: '1px solid #ddd' }}>{item.address}</li>
@@ -92,6 +92,7 @@ exploreDelegatesFrame.frame('/', async (c) => {
                     listStyleType: 'none',
                     padding: 0,
                     margin: '0 10px',
+                    width: '20%',
                   }}>
                     {delegates.map((item, index) => (
                       <li key={index} style={{ margin: '10px 0', padding: '5px', borderBottom: '1px solid #ddd' }}>{item.count}</li>
