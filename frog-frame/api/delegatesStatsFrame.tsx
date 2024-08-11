@@ -44,10 +44,6 @@ delegatesStatsFrame.frame('/', async (c) => {
     return badDelegateFrame(fid, c)
   }
 
-/*   if(!delegate.isGoodDelegate || !delegate.hasDelegate){
-    return exploreDelegatesFrame(fid, c)
-  } */
-
   return goodDelegateFrame(fid, c)    
 })
 
