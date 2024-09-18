@@ -47,12 +47,13 @@ def _extract_eth_addresses(response_data):
     eth_addresses = []
     for user in response_data.get('users', []):
         addresses = user.get('verified_addresses', {}).get('eth_addresses', [])
-        eth_addresses.extend(addresses)
+        eth_addresses.extend([{"address": addr} for addr in addresses])
     return eth_addresses
 
 def get_top_delegates(ethereum_addresses, delegate_dict):
     top_delegates = {}
-    for address in ethereum_addresses:
+    for address_dict in ethereum_addresses:
+        address = address_dict["address"]
         if address in delegate_dict:
             delegate = delegate_dict[address]
             if delegate in top_delegates:
@@ -63,6 +64,42 @@ def get_top_delegates(ethereum_addresses, delegate_dict):
     # Sort the delegates by their counts in descending order and get the top 3
     sorted_delegates = sorted(top_delegates.values(), key=lambda x: x['count'], reverse=True)
     top_3_delegates = sorted_delegates[:3]
+    
+    return top_3_delegates
+
+def get_username_from_addresses(addresses):
+    url = "https://api.neynar.com/v2/farcaster/user/bulk-by-address"
+    
+    headers = {
+        "accept": "application/json",
+        "api_key": "NEYNAR_API_DOCS"
+    }
+    
+    params = {
+        "addresses": ",".join(addresses),
+        "address_types": "verified_addresses"
+    }
+    
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+def _extract_usernames(response_data):
+    usernames = {}
+    for address, user_data in response_data.items():
+        if user_data:
+            username = user_data[0].get('username', 'no_farcaster_name')
+            usernames[address] = username
+        else:
+            usernames[address] = 'no_farcaster_name'
+    return usernames
+
+def get_delegates_usernames(top_3_delegates):
+    addresses = [delegate['address'] for delegate in top_3_delegates]
+    response_data = get_username_from_addresses(addresses)
+    usernames = _extract_usernames(response_data)
+    
+    for delegate in top_3_delegates:
+        delegate['username'] = usernames.get(delegate['address'], 'no_farcaster_name')
     
     return top_3_delegates
 
@@ -93,7 +130,8 @@ def lambda_handler(event, context):
     # Process the data
     following_data = get_farcaster_following_fids(fid)
     ethereum_addresses = get_ethereum_addresses_from_fids(following_data)
-    result = get_top_delegates(ethereum_addresses, delegate_dict)
+    top_3_delegates = get_top_delegates(ethereum_addresses, delegate_dict)
+    result = get_delegates_usernames(top_3_delegates)
 
     return {
         'statusCode': 200,
