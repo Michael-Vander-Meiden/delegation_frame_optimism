@@ -1,6 +1,8 @@
 import os
 import requests
 import json
+import boto3
+from datetime import datetime
 
 # get verified ethereum address from farcaster ID
 def get_ethereum_addresses_from_fids(fids=[192336]):
@@ -84,7 +86,13 @@ def check_if_delegate_is_good(delegate_address):
 def get_stats_function(fid):
 
     #Create dictionary that we will return
-    return_package = {"hasVerifiedAddress": False, "hasDelegate": False, "isGoodDelegate": False, "delegateInfo": None}
+    return_package = {
+        "hasVerifiedAddress": False,
+        "hasDelegate": False,
+        "isGoodDelegate": False,
+        "delegateInfo": None,
+        "userVerifiedAddress": None
+    }
 
     #check if there is a verified ethereum address
     eth_addresses = get_ethereum_addresses_from_fids([fid])
@@ -94,6 +102,7 @@ def get_stats_function(fid):
     
     return_package["hasVerifiedAddress"] = True
     eth_address = eth_addresses[0]
+    return_package["userVerifiedAddress"] = eth_address
 
     #check if there is a delegate
     delegate_address = get_delegate_from_ethereum_address(eth_address)
@@ -113,18 +122,42 @@ def get_stats_function(fid):
 
     return return_package
 
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('delegation_frame_query_log')
+
 def lambda_handler(event, context):
     # First, try to retrieve the 'fid' from multiValueQueryStringParameters
     if 'multiValueQueryStringParameters' in event and event['multiValueQueryStringParameters'] is not None:
         fid = event['multiValueQueryStringParameters'].get('fid', [None])[0]
     # If not present, fall back to using queryStringParameters
     elif 'queryStringParameters' in event and event['queryStringParameters'] is not None:
-        fid = event['queryStringParameters'].get('fid', '192336')  # Default to 8347 if fid not provided
+        fid = event['queryStringParameters'].get('fid', '192336')  # Default to 192336 if fid not provided
     else:
         fid = '192336'  # Default value if neither is present
 
     result = get_stats_function(fid)
     
+    # Add entry to DynamoDB only if userVerifiedAddress is not None
+    if result.get('userVerifiedAddress') is not None:
+        try:
+            timestamp = datetime.utcnow().isoformat()
+            fid_timestamp = f"{fid}#{timestamp}"
+            
+            table.put_item(
+                Item={
+                    'fid_timestamp': fid_timestamp,
+                    'fid': int(fid),
+                    'timestamp': timestamp,
+                    'eth_address': result['userVerifiedAddress'],
+                    'hasDelegate': result['hasDelegate'],
+                    'isGoodDelegate': result['isGoodDelegate']
+                }
+            )
+        except Exception as e:
+            print(f"Error writing to DynamoDB: {str(e)}")
+            # Optionally, you can choose to raise an exception here or handle it differently
+
     return {
         'statusCode': 200,
         'body': json.dumps(result)
