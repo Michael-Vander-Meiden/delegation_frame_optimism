@@ -18,10 +18,26 @@ def get_farcaster_following_fids(fid=192336):
         "limit": 100
     }
     
-    response = requests.get(url, headers=headers, params=params)
-    data = response.json()
+    fids = []
+    cursor = None
+    api_call_count = 0
     
-    fids = [user['user']['fid'] for user in data.get('users', [])]
+    while api_call_count < 10:
+        if cursor:
+            params['cursor'] = cursor
+        
+        response = requests.get(url, headers=headers, params=params)
+        data = response.json()
+        
+        fids.extend([user['user']['fid'] for user in data.get('users', [])])
+        
+        next_data = data.get('next', None)
+        if next_data:
+            cursor = next_data.get('cursor', None)
+        else:
+            break
+        
+        api_call_count += 1
     
     return fids
 
@@ -33,15 +49,23 @@ def get_ethereum_addresses_from_fids(fids=[192336]):
         "api_key": "NEYNAR_API_DOCS"
     }
     
-    # Convert the list of FIDs to a comma-separated string for the params
-    params = {
-        "fids": ",".join(map(str, fids))
-    }
+    all_eth_addresses = []
     
-    response = requests.get(url, headers=headers, params=params)
+    # Split the list of FIDs into batches of 100
+    for i in range(0, len(fids), 100):
+        batch_fids = fids[i:i+100]
+        
+        # Convert the list of FIDs to a comma-separated string for the params
+        params = {
+            "fids": ",".join(map(str, batch_fids))
+        }
+        
+        response = requests.get(url, headers=headers, params=params)
+        
+        # Assuming the response is JSON and contains Ethereum addresses for each FID
+        all_eth_addresses.extend(_extract_eth_addresses(response.json()))
     
-    # Assuming the response is JSON and contains Ethereum addresses for each FID
-    return _extract_eth_addresses(response.json())
+    return all_eth_addresses
 
 def _extract_eth_addresses(response_data):
     eth_addresses = []
@@ -50,16 +74,17 @@ def _extract_eth_addresses(response_data):
         eth_addresses.extend([{"address": addr} for addr in addresses])
     return eth_addresses
 
-def get_top_delegates(ethereum_addresses, delegate_dict):
+def get_top_delegates(ethereum_addresses, delegate_dict, good_delegates_dict):
     top_delegates = {}
     for address_dict in ethereum_addresses:
         address = address_dict["address"]
         if address in delegate_dict:
             delegate = delegate_dict[address]
-            if delegate in top_delegates:
-                top_delegates[delegate]['count'] += 1
-            else:
-                top_delegates[delegate] = {'address': delegate, 'count': 1}
+            if delegate in good_delegates_dict and good_delegates_dict[delegate]:
+                if delegate in top_delegates:
+                    top_delegates[delegate]['count'] += 1
+                else:
+                    top_delegates[delegate] = {'address': delegate, 'count': 1}
     
     # Sort the delegates by their counts in descending order and get the top 3
     sorted_delegates = sorted(top_delegates.values(), key=lambda x: x['count'], reverse=True)
@@ -118,19 +143,27 @@ def lambda_handler(event, context):
 
     # S3 bucket and file details
     bucket_name = 'superhack-frame'
-    file_key = 'delegation_dict.pkl'
+    delegation_file_key = 'delegation_dict.pkl'
+    good_delegates_file_key = 'good_delegates.pkl'
 
-    # Download the file from S3
-    s3_response = s3.get_object(Bucket=bucket_name, Key=file_key)
+    # Download the delegation_dict file from S3
+    s3_response = s3.get_object(Bucket=bucket_name, Key=delegation_file_key)
     file_content = s3_response['Body'].read()
 
-    # Load the pickle file
+    # Load the delegation_dict pickle file
     delegate_dict = pickle.loads(file_content)
+
+    # Download the good_delegates file from S3
+    s3_response = s3.get_object(Bucket=bucket_name, Key=good_delegates_file_key)
+    file_content = s3_response['Body'].read()
+
+    # Load the good_delegates pickle file
+    good_delegates_dict = pickle.loads(file_content)
 
     # Process the data
     following_data = get_farcaster_following_fids(fid)
     ethereum_addresses = get_ethereum_addresses_from_fids(following_data)
-    top_3_delegates = get_top_delegates(ethereum_addresses, delegate_dict)
+    top_3_delegates = get_top_delegates(ethereum_addresses, delegate_dict, good_delegates_dict)
     result = get_delegates_usernames(top_3_delegates)
 
     return {
