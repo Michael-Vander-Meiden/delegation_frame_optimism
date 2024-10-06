@@ -3,14 +3,19 @@ import requests
 import json
 import pickle
 import boto3
+import logging
 
+# Set up logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def get_farcaster_following_fids(fid=192336):
+    # docs: https://docs.neynar.com/reference/following-v2
     url = "https://api.neynar.com/v2/farcaster/following"
     
     headers = {
         "accept": "application/json",
-        "api_key": "NEYNAR_API_DOCS"
+        "api_key": os.environ["NEYNAR_API_KEY"]
     }
     
     params = {
@@ -26,19 +31,44 @@ def get_farcaster_following_fids(fid=192336):
         if cursor:
             params['cursor'] = cursor
         
-        response = requests.get(url, headers=headers, params=params)
-        data = response.json()
+        logger.info(f"Making API call {api_call_count + 1} with params: {params}")
         
-        fids.extend([user['user']['fid'] for user in data.get('users', [])])
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code != 200:
+            logger.error(f"API request failed. Status Code: {response.status_code}")
+            logger.error(f"Response content: {response.text}")
+            break
+        
+        try:
+            data = response.json()
+        except json.JSONDecodeError:
+            logger.error(f"Failed to decode JSON. Response content: {response.text}")
+            break
+        
+        if 'users' not in data:
+            logger.error(f"Unexpected response structure. Response content: {data}")
+            break
+        
+        new_fids = [user['user']['fid'] for user in data.get('users', [])]
+        fids.extend(new_fids)
+        logger.info(f"Retrieved {len(new_fids)} new FIDs. Total FIDs: {len(fids)}")
         
         next_data = data.get('next', None)
         if next_data:
             cursor = next_data.get('cursor', None)
+            logger.info(f"Next cursor: {cursor}")
         else:
+            logger.info("No more pages to fetch.")
+            break
+        
+        if not cursor:
+            logger.info("Cursor is None, stopping pagination.")
             break
         
         api_call_count += 1
     
+    logger.info(f"Retrieved {len(fids)} following FIDs for FID {fid}")
     return fids
 
 def get_ethereum_addresses_from_fids(fids=[192336]):
@@ -46,7 +76,7 @@ def get_ethereum_addresses_from_fids(fids=[192336]):
     
     headers = {
         "accept": "application/json",
-        "api_key": "NEYNAR_API_DOCS"
+        "api_key": os.environ["NEYNAR_API_KEY"]
     }
     
     all_eth_addresses = []
@@ -65,6 +95,7 @@ def get_ethereum_addresses_from_fids(fids=[192336]):
         # Assuming the response is JSON and contains Ethereum addresses for each FID
         all_eth_addresses.extend(_extract_eth_addresses(response.json()))
     
+    logger.info(f"Retrieved {len(all_eth_addresses)} Ethereum addresses from {len(fids)} FIDs")
     return all_eth_addresses
 
 def _extract_eth_addresses(response_data):
@@ -90,6 +121,7 @@ def get_top_delegates(ethereum_addresses, delegate_dict, good_delegates_dict):
     sorted_delegates = sorted(top_delegates.values(), key=lambda x: x['count'], reverse=True)
     top_3_delegates = sorted_delegates[:3]
     
+    logger.info(f"Found top {len(top_3_delegates)} delegates")
     return top_3_delegates
 
 def get_username_from_addresses(addresses):
@@ -97,7 +129,7 @@ def get_username_from_addresses(addresses):
     
     headers = {
         "accept": "application/json",
-        "api_key": "NEYNAR_API_DOCS"
+        "api_key": os.environ["NEYNAR_API_KEY"]
     }
     
     params = {
@@ -106,6 +138,10 @@ def get_username_from_addresses(addresses):
     }
     
     response = requests.get(url, headers=headers, params=params)
+    if response.status_code != 200:
+        logger.error(f"API request failed. Status Code: {response.status_code}, Response: {response.text}")
+        return None
+    logger.info(f"Retrieved usernames for {len(addresses)} addresses")
     return response.json()
 
 def _extract_usernames(response_data):
@@ -126,9 +162,12 @@ def get_delegates_usernames(top_3_delegates):
     for delegate in top_3_delegates:
         delegate['username'] = usernames.get(delegate['address'], 'no_farcaster_name')
     
+    logger.info(f"Added usernames to {len(top_3_delegates)} delegates")
     return top_3_delegates
 
 def lambda_handler(event, context):
+    logger.info("Lambda function started")
+    
     # Initialize S3 client
     s3 = boto3.client('s3')
 
@@ -140,25 +179,31 @@ def lambda_handler(event, context):
         fid = event['queryStringParameters'].get('fid', '192336')  # Default to 192336 if fid not provided
     else:
         fid = '192336'  # Default value if neither is present
+    
+    logger.info(f"Using FID: {fid}")
 
     # S3 bucket and file details
     bucket_name = 'superhack-frame'
     delegation_file_key = 'delegation_dict.pkl'
     good_delegates_file_key = 'good_delegates.pkl'
 
+    logger.info(f"Downloading delegation_dict from S3: {bucket_name}/{delegation_file_key}")
     # Download the delegation_dict file from S3
     s3_response = s3.get_object(Bucket=bucket_name, Key=delegation_file_key)
     file_content = s3_response['Body'].read()
 
     # Load the delegation_dict pickle file
     delegate_dict = pickle.loads(file_content)
+    logger.info(f"Loaded delegation_dict with {len(delegate_dict)} entries")
 
+    logger.info(f"Downloading good_delegates from S3: {bucket_name}/{good_delegates_file_key}")
     # Download the good_delegates file from S3
     s3_response = s3.get_object(Bucket=bucket_name, Key=good_delegates_file_key)
     file_content = s3_response['Body'].read()
 
     # Load the good_delegates pickle file
     good_delegates_dict = pickle.loads(file_content)
+    logger.info(f"Loaded good_delegates_dict with {len(good_delegates_dict)} entries")
 
     # Process the data
     following_data = get_farcaster_following_fids(fid)
@@ -166,6 +211,7 @@ def lambda_handler(event, context):
     top_3_delegates = get_top_delegates(ethereum_addresses, delegate_dict, good_delegates_dict)
     result = get_delegates_usernames(top_3_delegates)
 
+    logger.info(f"Lambda function completed successfully. Result: {result}")
     return {
         'statusCode': 200,
         'body': json.dumps(result)  # Convert the list to a JSON string
