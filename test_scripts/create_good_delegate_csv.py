@@ -17,9 +17,8 @@ def check_if_delegate_is_good(delegate_address):
     response = requests.get(api_url, headers=headers, params=params)
     
     response_data = response.json()    
-    
     #check if delegate is good
-    if response_data.get("lastTenProps") == "10":
+    if response_data.get("lastTenProps") == "10" and response_data.get("statement") != None:
         return True
     else:
         return False

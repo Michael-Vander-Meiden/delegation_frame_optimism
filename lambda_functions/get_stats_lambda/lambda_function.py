@@ -10,7 +10,7 @@ def get_ethereum_addresses_from_fids(fids=[192336]):
     
     headers = {
         "accept": "application/json",
-        "api_key": "NEYNAR_API_DOCS"
+        "api_key": os.environ["NEYNAR_API_KEY"]
     }
     
     # Convert the list of FIDs to a comma-separated string for the params
