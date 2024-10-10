@@ -15,7 +15,7 @@ def get_username_from_addresses(addresses):
     
     headers = {
         "accept": "application/json",
-        "api_key": "NEYNAR_API_DOCS"
+        "api_key": os.environ["NEYNAR_API_KEY"]
     }
     
     params = {
