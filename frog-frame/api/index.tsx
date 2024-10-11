@@ -2,12 +2,15 @@
 import * as dotenv from 'dotenv'
 dotenv.config();
 
-import { Button, Frog, TextInput } from 'frog'
+import { Button, Frog} from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
 import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
 
+import { DelegatesResponseDTO } from './service/delegatesResponseDTO.js';
+import { suggestedDelegates, suggestionResponseDTO } from './service/suggestionResponseDTO.js';
+import { randomDelegates, randomResponseDTO } from './service/randomResponseDTO.js';
 
 // Uncomment to use Edge Runtime.
 // export const config = {
@@ -31,6 +34,66 @@ export const app = new Frog({
   }
 })
 
+/* API CALL GET_STATS */
+export async function getStats(fid: number) : Promise<DelegatesResponseDTO>{
+    
+  const delegateApiURL = new URL(`${process.env.DELEGATE_API_URL}/get_stats`)
+
+  delegateApiURL.searchParams.append('fid', fid.toString());
+
+  const response = await fetch(delegateApiURL, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json'
+      }
+  })
+
+  if (!response.ok){
+    console.log(`Error get delegate info for fid ${fid}`)
+  }
+  let data : DelegatesResponseDTO = await response.json();
+  return data
+}
+
+/* API CALL GET_SUGGESTED_DELEGATES */
+export async function getSuggestedDelegates(fid: number): Promise<suggestionResponseDTO> {
+
+  const delegateApiURL = new URL(`${process.env.DELEGATE_API_URL}/get_suggested_delegates`);
+
+  delegateApiURL.searchParams.append('fid', fid.toString());
+
+  const response = await fetch(delegateApiURL, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json'
+      }
+  })
+
+  if (!response.ok){
+    console.log(`Error getSuggestedDelegates for fid ${fid}`)
+  }
+  let data : suggestionResponseDTO = await response.json()
+  return data
+}
+
+/* API CALL GET_RANDOM_DELEGATES */
+export async function getRandomDelegates(): Promise<randomResponseDTO> {
+
+  const delegateApiURL = new URL(`${process.env.DELEGATE_API_URL}/get_random_delegates`);
+
+  const response = await fetch(delegateApiURL, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json'
+      }
+  })
+
+  if (!response.ok){
+    console.log(`Error getRandomDelegates`)
+  }
+  let data : randomResponseDTO = await response.json()
+  return data
+}
 
 app.frame('/', (c) => {
   
@@ -38,7 +101,6 @@ app.frame('/', (c) => {
     image: `/Frame_1_start_NEW.jpg`,
     imageAspectRatio: '1.91:1',
     intents: [
-      <TextInput placeholder="Enter fid..." />,
       <Button action="/delegatesStats">View Stats</Button>
     ],
   })
