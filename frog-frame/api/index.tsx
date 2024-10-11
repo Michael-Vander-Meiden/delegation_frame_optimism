@@ -8,7 +8,6 @@ import { serveStatic } from 'frog/serve-static'
 import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
 
-import { delegatesStatsFrame } from './delegatesStatsFrame.js'
 
 // Uncomment to use Edge Runtime.
 // export const config = {
@@ -36,7 +35,7 @@ export const app = new Frog({
 app.frame('/', (c) => {
   
   return c.res({
-    image: `/Frame_1_start.png`,
+    image: `/Frame_1_start_NEW.jpg`,
     imageAspectRatio: '1.91:1',
     intents: [
       <TextInput placeholder="Enter fid..." />,
@@ -45,7 +44,6 @@ app.frame('/', (c) => {
   })
 })
 
-app.route('/delegatesStats', delegatesStatsFrame)
 
 // @ts-ignore
 const isEdgeFunction = typeof EdgeFunction !== 'undefined'
