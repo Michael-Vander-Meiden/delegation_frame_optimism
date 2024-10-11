@@ -2,7 +2,7 @@
 import * as dotenv from 'dotenv'
 dotenv.config();
 
-import { Button, Frog} from 'frog'
+import { Button, Frog, FrameIntent} from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
 import { neynar } from 'frog/hubs'
@@ -112,6 +112,14 @@ function truncateMiddle (text: string, maxLength: number) : string{
   const start = Math.ceil((maxLength - 3) / 2)
   const end = Math.floor((maxLength - 3) / 2)
   return text.slice(0, start) + '...' + text.slice(-end)
+}
+
+function truncateWord(str: string, maxLength: number) {
+  if (str.length <= maxLength) {
+    return str;
+  }
+  
+  return str.slice(0, maxLength) + '...';
 }
 
 app.frame('/delegatesStats', async (c) => {
@@ -300,6 +308,361 @@ app.frame('/delegatesStats', async (c) => {
 
 })
 
+/* BUTTON FUNCTIONS */
+function getOrdinalSuffix(index: number): string {
+  const suffixes = ["th", "st", "nd", "rd"];
+  const value = index % 100;
+  return suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0];
+}
+
+function getIntentsSuggested(delegates: suggestedDelegates[]) : FrameIntent[]{
+  return delegates.map((delegate: suggestedDelegates, index: number) => {
+    const position = index+1
+    return <Button.Link href={`https://vote.optimism.io/delegates/${delegate.address}`}>{`${position}${getOrdinalSuffix(position)} Delegate`}</Button.Link>
+  })
+}
+
+function getIntentsRandom(delegates: randomDelegates[]) : FrameIntent[]{
+  return delegates.map((delegate: randomDelegates, index: number) => {
+    const position = index+1
+    return <Button.Link href={`https://vote.optimism.io/delegates/${delegate.address}`}>{`${position}${getOrdinalSuffix(position)} Delegate`}</Button.Link>
+  })
+}
+
+app.frame('/socialRecommendation', async (c) => {
+  const { frameData } = c;
+  const { fid } = frameData || {}
+
+
+//TODO MOCKED
+//const fid = 192336
+
+  if (typeof fid !== 'number' || fid === null){
+    return c.res({
+      image: `/Frame_6_error.png`,
+      imageAspectRatio: '1.91:1',
+      intents: [
+        <Button.Reset>Try again</Button.Reset>,
+      ],
+    })
+  }
+
+  const delegates = await getSuggestedDelegates(fid);
+  const delegatesRandom = await getRandomDelegates();
+
+  if (delegates.length === 0 && delegatesRandom.length === 0){
+    return c.res({
+      image: `/Frame_6_error.png`,
+      imageAspectRatio: '1.91:1',
+      intents: [
+        <Button.Reset>Try again</Button.Reset>,
+      ],
+    })
+  }
+  
+  /* TODO MOCKED DELEGATES */
+  //delegates.length = 0
+
+  if (delegates.length === 0 && delegatesRandom.length !== 0) {
+    
+    const intents = getIntentsRandom(delegatesRandom);
+    intents.push(<Button.Reset>Reset</Button.Reset>);
+    
+    return c.res({
+    image: (  
+    <div
+      style={{
+        display: 'flex',
+        background: '#f6f6f6',
+        alignItems: 'center',
+        position: 'relative',
+      }}
+    > 
+      <img width="1200" height="630" alt="background" src={`/Frame_8_no_followers.png`} />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'absolute',
+          color: '#161B33',
+          fontSize: '65px',
+          textTransform: 'uppercase',
+          letterSpacing: '-0.030em',
+          width: '100%',
+          boxSizing: 'border-box',
+          alignItems: 'center',
+          lineHeight: 0.8,
+          padding: '0px',
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis',
+          textAlign: 'center', 
+          top: '30%',
+          height: '80%',
+        }}>      
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row', 
+          flexWrap: 'wrap', 
+          width: '100%',
+          maxWidth: '100%',
+          justifyContent: 'center',
+        }}>
+          {[0, 1, 2].map(colIndex => (
+            <div key={colIndex} style={{
+              display: 'flex',
+              flexDirection: 'column', 
+              width: '30%', 
+              boxSizing: 'border-box',
+              margin: '0 20px', 
+            }}>
+              {delegatesRandom
+                .filter((_, index) => index % 3 === colIndex) 
+                .map((item, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    margin: '5px 0',
+                    alignItems: 'center',
+                    textOverflow: 'ellipsis',
+                    color: colIndex === 1 ? '#E5383B' : '#36A4B4',
+                    whiteSpace: 'nowrap',
+                    height: 'auto', 
+                  }}>                    
+                    { item.username === 'no_farcaster_name' ? truncateMiddle(item.address, 11) :  truncateWord(item.username, 12)}
+                  </div>
+                ))
+              }
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    ),
+    intents,
+    });
+    
+  }
+  
+  const intents = getIntentsSuggested(delegates);
+  intents.push(<Button.Reset>Reset</Button.Reset>);
+  
+  /* ONE DELEGATE FRAME */
+  if (delegates.length === 1) {
+    return c.res({
+      image: (  
+  <div
+    style={{
+      display: 'flex',
+      background: '#f6f6f6',
+      alignItems: 'center',
+      position: 'relative',
+    }}
+  > 
+    <img width="1200" height="630" alt="background" src={`/Frame_3_rec_ONLY_1.png`} />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'absolute',
+        color: '#161B33',
+        fontSize: '70px',
+        textTransform: 'uppercase',
+        letterSpacing: '-0.030em',
+        width: '100%',
+        lineHeight: 1.1,
+        boxSizing: 'border-box',
+        alignItems: 'center',
+        padding: '0px',
+        overflow: 'hidden', 
+        textOverflow: 'ellipsis',
+        textAlign: 'center', 
+        top: '26%',
+        height: '80%'
+      }}>      
+      <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            textAlign: 'center',
+            left: '16%',
+            width: '100%',
+            maxWidth: '100%',
+      }}>
+        {delegates.map((item, index) => (
+          <div key={index} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            margin: '0',
+            alignItems: 'center',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            color: '#E5383B',
+            height: 'auto'
+          }}>                    
+            { item.username === 'no_farcaster_name' ? truncateMiddle(item.address, 11) :  truncateWord(item.username, 12)}
+            <br/>
+            {item.count}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+        ),
+  intents,
+    });
+  }
+  
+  /* TWO DELEGATES FRAME */
+  if (delegates.length === 2) {
+    return c.res({
+      image: (  
+  <div
+    style={{
+      display: 'flex',
+      background: '#f6f6f6',
+      alignItems: 'center',
+      position: 'relative',
+    }}
+  > 
+    <img width="1200" height="630" alt="background" src={`/Frame_3_rec_ONLY_2.png`} />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'absolute',
+        color: '#161B33',
+        fontSize: '70px',
+        textTransform: 'uppercase',
+        letterSpacing: '-0.030em',
+        width: '100%',
+        lineHeight: 1.1,
+        boxSizing: 'border-box',
+        alignItems: 'center',
+        padding: '0px',
+        overflow: 'hidden', 
+        textOverflow: 'ellipsis',
+        textAlign: 'center', 
+        top: '18%',
+        height: '80%'
+      }}>      
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        width: '100%'
+      }}>
+        {[0, 1].map(colIndex => (
+          <div key={colIndex} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '34%',
+            margin: '0'
+          }}>
+            {delegates
+              .filter((_, index) => index % 2 === colIndex)
+              .map((item, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  margin: '5px 0',
+                  alignItems: 'center',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  color: colIndex === 1 ? '#E5383B' : '#36A4B4',
+                  height: 'auto'
+                }}>                    
+                  { item.username === 'no_farcaster_name' ? truncateMiddle(item.address, 11) :  truncateWord(item.username, 12)}
+                  <br/>
+                  {item.count}
+                </div>
+              ))
+            }
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+        ),
+  intents,
+    });
+  }
+  
+  /* THREE DELEGATES FRAME */
+  return c.res({
+  image: (  
+  <div
+    style={{
+      display: 'flex',
+      background: '#f6f6f6',
+      alignItems: 'center',
+      position: 'relative',
+    }}
+  > 
+    <img width="1200" height="630" alt="background" src={`/Frame_3_social.png`} />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'absolute',
+        color: '#161B33',
+        fontSize: '70px',
+        textTransform: 'uppercase',
+        letterSpacing: '-0.030em',
+        width: '100%',
+        lineHeight: 1.1,
+        boxSizing: 'border-box',
+        alignItems: 'center',
+        padding: '0px',
+        overflow: 'hidden', 
+        textOverflow: 'ellipsis',
+        textAlign: 'center', 
+        top: '18%',
+        height: '80%',
+      }}>      
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        width: '100%',
+        maxWidth: '100%',
+        justifyContent: 'center',
+      }}>
+        {[0, 1, 2].map(colIndex => (
+          <div key={colIndex} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '30%', 
+            boxSizing: 'border-box',
+            margin: '0 20px', 
+          }}>
+            {delegates
+              .filter((_, index) => index % 3 === colIndex)
+              .map((item, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  flexDirection: 'column', 
+                  margin: '5px 0',
+                  alignItems: 'center',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  color: colIndex === 1 ? '#E5383B' : '#36A4B4',
+                  height: 'auto',
+                }}>                    
+                  { item.username === 'no_farcaster_name' ? truncateMiddle(item.address, 11) :  truncateWord(item.username, 12)}
+                  <br/>
+                  {item.count}
+                </div>
+              ))
+            }
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+  ),
+  intents,
+  });
+  
+})
 
 // @ts-ignore
 const isEdgeFunction = typeof EdgeFunction !== 'undefined'
