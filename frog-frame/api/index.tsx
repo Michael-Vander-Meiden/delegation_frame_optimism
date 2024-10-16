@@ -191,7 +191,7 @@ app.frame('/delegatesStats', async (c) => {
               position: 'relative',
               overflow: 'hidden'
           }}>
-              <img width="1200" height="630" alt="background" src={`/Frame_2.1_bad_delegate_stats_dynamic.png`} style={{position: 'absolute', width: '100%', height: '100%', objectFit: 'cover'}} />
+              <img width="1200" height="630" alt="background" src={`/Frame_2.1_stats_dynamic.png`} style={{position: 'absolute', width: '100%', height: '100%', objectFit: 'cover'}} />
               
               <div
                   style={{
