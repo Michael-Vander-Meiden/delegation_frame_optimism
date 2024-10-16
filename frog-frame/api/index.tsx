@@ -244,7 +244,7 @@ app.frame('/delegatesStats', async (c) => {
     throw new Error('Invalid type returned');
   }
 
-  const vercelLink = 'http://delegation-frame-optimism.vercel.app/api'
+  const vercelLink = 'https://delegation-frame-optimism.vercel.app/api'
 
   /* GOOD DELEGATE FRAME */
     return c.res({
