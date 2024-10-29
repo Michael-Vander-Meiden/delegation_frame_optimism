@@ -98,7 +98,7 @@ export async function getRandomDelegates(): Promise<randomResponseDTO> {
 app.frame('/', (c) => {
   
   return c.res({
-    image: `/Frame_1_start_NEW.jpg`,
+    image: `/Frame_1_start.jpg`,
     imageAspectRatio: '1.91:1',
     intents: [
       <Button action="/delegatesStats">View Stats</Button>
@@ -157,7 +157,7 @@ app.frame('/delegatesStats', async (c) => {
 
   if(!delegate.hasDelegate) {
     return c.res({
-      image: `/Frame_5_no delegate_explore.png`,
+      image: `/Frame_5_no delegate.png`,
       imageAspectRatio: '1.91:1',
       intents: [
         <Button action='/socialRecommendation'>Social Graph</Button>,
@@ -191,7 +191,7 @@ app.frame('/delegatesStats', async (c) => {
               position: 'relative',
               overflow: 'hidden'
           }}>
-              <img width="1200" height="630" alt="background" src={`/Frame_2.1_stats_dynamic.png`} style={{position: 'absolute', width: '100%', height: '100%', objectFit: 'cover'}} />
+              <img width="1200" height="630" alt="background" src={`/Frame_2.1_bad_delegate.png`} style={{position: 'absolute', width: '100%', height: '100%', objectFit: 'cover'}} />
               
               <div
                   style={{
