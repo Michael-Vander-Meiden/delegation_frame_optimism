@@ -101,7 +101,7 @@ app.frame('/', (c) => {
     image: `/Frame_1_start.jpg`,
     imageAspectRatio: '1.91:1',
     intents: [
-      <Button action="/delegatesStats">View Stats</Button>
+      <Button action="/delegatesStats">Check my delegate (4s)</Button>
     ],
   })
 })
@@ -160,8 +160,8 @@ app.frame('/delegatesStats', async (c) => {
       image: `/Frame_5_no delegate.png`,
       imageAspectRatio: '1.91:1',
       intents: [
-        <Button action='/socialRecommendation'>Social Graph</Button>,
-        <Button action='/randomRecommendation'>Random</Button>,
+        <Button action='/socialRecommendation'>Social Graph (5s)</Button>,
+        <Button action='/randomRecommendation'>Random (4s)</Button>,
         <Button.Reset>Reset</Button.Reset>,
       ],
     })
@@ -232,8 +232,8 @@ app.frame('/delegatesStats', async (c) => {
           </div>
       ),
         intents: [
-          <Button action='/socialRecommendation'>Social Graph</Button>,
-          <Button action='/randomRecommendation'>Random</Button>,
+          <Button action='/socialRecommendation'>Social Graph (5s)</Button>,
+          <Button action='/randomRecommendation'>Random (4s)</Button>,
           <Button.Reset>Reset</Button.Reset>
         ],
       })
