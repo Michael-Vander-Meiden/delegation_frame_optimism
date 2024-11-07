@@ -145,7 +145,7 @@ app.frame('/delegatesStats', async (c) => {
 
   if (!delegate.hasVerifiedAddress){
       return c.res({
-        image: `/Frame_4_not_verified.png`,
+        image: `/Frame_4_not_verified_wait.png`,
         imageAspectRatio: '1.91:1',
         intents: [
             <Button.Reset>Try again</Button.Reset>,
